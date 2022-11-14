@@ -1,0 +1,4 @@
+graph-theory
+matplotlib
+scipy
+# Also, for TeX output in pyplot: apt install texlive-latex-extra cm-super dvipng
