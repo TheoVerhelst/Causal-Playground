@@ -7,6 +7,7 @@ class IndependentDistribution:
         self.generator = np.random.default_rng(seed)
      
     def rvs(self, size):
+        """Generates a number of random samples of the distribution."""
         return {var: dist.rvs(size=size, random_state=self.generator) \
                 for var, dist in self.dists.items()}
     

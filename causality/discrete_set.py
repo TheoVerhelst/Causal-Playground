@@ -4,16 +4,17 @@ class DiscreteSet:
     def __init__(self, dimensions, values: np.ndarray):
         """Contructor.
         
-        Arguments:
-        dimensions -- iterable of N variables denoting the dimensions
-        values -- N-dimensional boolean array that says which
-            combinations of values is included in the set.
+        :param dimensions: iterable of N variables denoting the dimensions
+        :param values: N-dimensional boolean array indicating which
+            combinations of values are included in the set.
         """
         self.dimensions = tuple(dimensions)
         self.values = values
     
     def tensor(self, other, axis):
-        """Tensor product of both sets, where the sum is over axis."""
+        """Tensor product of both sets, where the sum is over `axis`.
+        Dimensions common to `self` and `other` are then collapsed into one.
+        """
         i = self.dimensions.index(axis)
         j = other.dimensions.index(axis)
         assert self.dimensions[i] == other.dimensions[j], \
@@ -71,20 +72,25 @@ class DiscreteSet:
         return res
     
     def match_to_broadcast(self, other):
-        """Moves and adds dimensions in self to be broadcastable with
-        other. All the rightmost dimensions in self will be identical to
-        the dimensions of other, and the dimensions unique to self will
+        """Moves and adds dimensions in `self` to be broadcastable with
+        `other`. All the rightmost dimensions in `self` will be identical to
+        the dimensions of `other`, and the dimensions unique to `self` will
         be the leftmost ones, which will be automatically broadcasted on
-        other by numpy.
+        `other` by numpy.
         
         Example input:
+        ```
             self.dimensions  = (a, b, c)
             other.dimensions = (c, b, d)
+        ```
         Result:
+        ```
             self.dimensions  = (a, b, c, d)
-        After this operation, any numpy operation such as self + other
-        will broadcast other to add the dimensions (a,) to the left.
-        Note that added dimensions in self (here, d) have a size of 1.
+        ```
+        
+        After this operation, any numpy operation such as `self + other`
+        will broadcast `other` to add the dimensions `(a,)` to the left.
+        Note that added dimensions in `self` (here, d) have a size of 1.
         """
         # Use list instead of tuple because dimensions will change here
         new_dims = list(self.dimensions)

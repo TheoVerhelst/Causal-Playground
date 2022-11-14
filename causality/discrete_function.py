@@ -3,14 +3,15 @@ import numpy as np
 from causality.discrete_set import DiscreteSet
 
 class DiscreteFunction:
-    def __init__(self, function, inputs: tuple, output):
+    def __init__(self, function, inputs, output):
         """Constructor.
         
-        Arguments:
-        function -- function that takes as many arguments as the
-            number of collections in domain.
-        inputs -- a sequence of Variables that indicate the function domain
-        output -- a Variable instance representing the function codomain
+        :param function: function that takes as many arguments as the
+            number of variables in `inputs`
+        :param inputs: a sequence of `Variable` instances that indicate
+            the function domain
+        :param output: a `Variable` instance representing the function
+            codomain
         """
         self.function = function
         self.inputs = tuple(inputs)
