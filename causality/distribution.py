@@ -7,11 +7,23 @@ class IndependentDistribution:
         self.generator = np.random.default_rng(seed)
      
     def rvs(self, size):
-        """Generates a number of random samples of the distribution."""
+        """Generates a number of random samples of the distribution.
+        
+        :param size: The number of samples to generate
+        :return: A dictionnary `{var: array}` where `var` is a
+        `Variable`, and `array` is a numpy array of the sampled values.
+        """
         return {var: dist.rvs(size=size, random_state=self.generator) \
                 for var, dist in self.dists.items()}
     
     def pmf(self, set_: DiscreteSet):
+        """Computes the probability of observing the given set of
+        values.
+        
+        :param set_: A DiscreteSet denoting the values to consider. Must
+        have the same dimensions as `self.dist.keys()`.
+        :return: The probability of the set of values.
+        """
         assert all(var in self.dists for var in set_.dimensions)
         proba_total = 0
         it = np.nditer(set_.values, flags=["multi_index"])
