@@ -2,7 +2,7 @@ import numpy as np
 from causality.discrete_set import DiscreteSet
 
 class Variable:
-    def __init__(self, name, support, intervention = None):
+    def __init__(self, name: str, support: list, intervention = None):
         self.name = name
         self.support = support
         self.intervention = intervention

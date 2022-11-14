@@ -3,26 +3,32 @@ from causality.discrete_set import DiscreteSet
 
 class IndependentDistribution:
     def __init__(self, dists: dict, seed=None):
+        """Constructor.
+        
+        :param dists: A dict where the keys are `Variable`  instances,
+            and the values are random distributions from `scipy.stats`
+        :param seed: The random seed for sampling random values
+        """ 
         self.dists = dists
         self.generator = np.random.default_rng(seed)
      
-    def rvs(self, size):
+    def rvs(self, size: int) -> dict:
         """Generates a number of random samples of the distribution.
         
         :param size: The number of samples to generate
         :return: A dictionnary `{var: array}` where `var` is a
-        `Variable`, and `array` is a numpy array of the sampled values.
+        `Variable`, and `array` is a numpy array of the sampled values
         """
         return {var: dist.rvs(size=size, random_state=self.generator) \
                 for var, dist in self.dists.items()}
     
-    def pmf(self, set_: DiscreteSet):
+    def pmf(self, set_: DiscreteSet) -> float:
         """Computes the probability of observing the given set of
         values.
         
         :param set_: A DiscreteSet denoting the values to consider. Must
-        have the same dimensions as `self.dist.keys()`.
-        :return: The probability of the set of values.
+        have the same dimensions as `self.dist.keys()`
+        :return: The probability of the set of values
         """
         assert all(var in self.dists for var in set_.dimensions)
         proba_total = 0

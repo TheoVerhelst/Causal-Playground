@@ -1,3 +1,5 @@
+from operator import mul
+from functools import reduce
 import numpy as np
 
 class DiscreteSet:
@@ -13,36 +15,19 @@ class DiscreteSet:
     
     def tensor(self, other, axis):
         """Tensor product of both sets, where the sum is over `axis`.
-        Dimensions common to `self` and `other` are then collapsed into one.
+        Dimensions common to `self` and `other` are collapsed into one.
         """
-        i = self.dimensions.index(axis)
-        j = other.dimensions.index(axis)
-        assert self.dimensions[i] == other.dimensions[j], \
-            "the dimension of the summed axis of self and other should match"
-        dimensions = self.dimensions[:i] + self.dimensions[i + 1:] \
-            + other.dimensions[:j] + other.dimensions[j + 1:]
-        values = np.tensordot(self.values, other.values, (i,j))
         
-        while True:
-            try:
-                for i, dim_i in enumerate(dimensions):
-                    for j, dim_j in enumerate(dimensions[i + 1:], start=i + 1):
-                        if dim_i == dim_j:
-                            # Replace axes i and j by only one running along
-                            # the diagonal of the sub-space (i, j). Numpy
-                            # puts this new dimension at the end.
-                            values = np.diagonal(values, axis1=i, axis2=j)
-                            dimensions = dimensions[:i] \
-                                    + dimensions[i + 1:j] \
-                                    + dimensions[j + 1:] \
-                                    + (dim_i,)
-                            # Restart the outermost for loop if we found
-                            # a duplicate dimension
-                            raise StopIteration()
-                break
-            except StopIteration:
-                continue
-        
+        common_dimensions = self.match_to_tensor(other, axis)
+        common_size = reduce(mul, (len(dim.support) for dim in common_dimensions), 1)
+        self_values = self.values.reshape((len(axis.support), common_size, -1))
+        other_values = other.values.reshape((len(axis.support), common_size, -1))
+
+        values = np.einsum("ijk,ijl->jkl", self_values, other_values)
+        dimensions = tuple(common_dimensions) \
+                + self.dimensions[len(common_dimensions) + 1:] \
+                + other.dimensions[len(common_dimensions) + 1:]
+        values = values.reshape(tuple(len(dim.support) for dim in dimensions))
         return DiscreteSet(dimensions, values)
     
     def copy(self):
@@ -71,6 +56,39 @@ class DiscreteSet:
         res.values = np.logical_not(res.values)
         return res
     
+    def match_to_tensor(self, other, axis):
+        """
+        Example input:
+        ```
+            axis = c
+            self.dimensions = (a, d, c, b)
+            other.dimensions = (e, f, c, b)
+        ```
+        Result:
+        ```
+            self.dimensions = (c, b, a, d)
+            other.dimensions = (c, b, e, f)
+        ```
+        """
+        self.swap_axes(0, self.dimensions.index(axis))
+        other.swap_axes(0, other.dimensions.index(axis))
+        common_dimensions = []
+        for i_self, dim in enumerate(self.dimensions[1:], start=1):
+            if dim in other.dimensions:
+                i_other = other.dimensions.index(dim)
+                self.swap_axes(len(common_dimensions) + 1, i_self)
+                other.swap_axes(len(common_dimensions) + 1, i_other)
+                common_dimensions.append(dim)
+        return common_dimensions
+                
+    
+    def swap_axes(self, i, j):
+        self.values = np.swapaxes(self.values, i, j)
+        new_dims = list(self.dimensions)
+        new_dims[i], new_dims[j] = new_dims[j], new_dims[i]
+        self.dimensions = tuple(new_dims)
+                
+    
     def match_to_broadcast(self, other):
         """Moves and adds dimensions in `self` to be broadcastable with
         `other`. All the rightmost dimensions in `self` will be identical to
@@ -92,19 +110,15 @@ class DiscreteSet:
         will broadcast `other` to add the dimensions `(a,)` to the left.
         Note that added dimensions in `self` (here, d) have a size of 1.
         """
-        # Use list instead of tuple because dimensions will change here
-        new_dims = list(self.dimensions)
         # Enumerate the dimensions in reverse order (i.e. starting from the right)
         for i_other, dim in enumerate(reversed(other.dimensions)):
-            N = len(new_dims)
+            N = len(self.dimensions)
             try:
-                i_self = new_dims.index(dim)
+                i_self = self.dimensions.index(dim)
                 assert i_self >= i_other
                 # Swap axes in self
-                new_dims[i_self], new_dims[N - i_other] = new_dims[N - i_other], new_dims[i_self]
-                self.values = np.swapaxes(self.values, N - i_other, i_self)
+                self.swap_axes(i_self, N - i_other)
             except ValueError:
                 # Add an axis in self
-                new_dims.insert(N - i_other, dim)
+                self.dimensions = self.dimensions[:N - i_other] + (dim,) + self.dimensions[N - i_other:]
                 self.values = np.expand_dims(self.values, N - i_other)
-        self.dimensions = tuple(new_dims)

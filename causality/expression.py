@@ -1,4 +1,13 @@
 from functools import reduce
+from typing import Protocol
+from causality.discrete_set import DiscreteSet
+
+class Expression(Protocol):
+    def __str__(self) -> str:
+        ...
+    
+    def values(self) -> DiscreteSet:
+        ...
 
 class EqualityExpr:
     def __init__(self, variable, value):

@@ -1,8 +1,12 @@
 from functools import reduce
 from copy import copy
+from typing import Mapping
 import numpy as np
 from causality.causal_graph import CausalGraph
 from causality.discrete_function import DiscreteFunction, ConstantFunction
+from causality.variable import Variable
+from causality.distribution import IndependentDistribution
+from causality.expression import Expression
 
 def infer_causal_graph(functions):
     G = CausalGraph()
@@ -12,7 +16,10 @@ def infer_causal_graph(functions):
     return G
 
 class CausalModel:
-    def __init__(self, exo_dist, functions):
+    def __init__(
+            self,
+            exo_dist: IndependentDistribution,
+            functions: Mapping[Variable, DiscreteFunction]):
         self.exo_dist = exo_dist
         self.functions = functions
         self.graph = infer_causal_graph(functions)
@@ -27,7 +34,7 @@ class CausalModel:
         self.sorted_endogenous = [v for v in self.graph.topological_sort() \
                 if v in self.functions.keys()]
     
-    def rvs(self, size):
+    def rvs(self, size: int) -> dict[Variable, np.ndarray]:
         # Step 1: all exogenous variables are sampled
         values = self.exo_dist.sample(size)
         
@@ -41,7 +48,7 @@ class CausalModel:
             values[var] = function.function(*[values[parent] for parent in function.inputs])
         return values
     
-    def probability(self, expression):
+    def probability(self, expression: Expression) -> float:
         values = expression.values()
         
         # If we have counterfactual variables, add the twin networks
