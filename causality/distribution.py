@@ -1,8 +1,10 @@
+from typing import Mapping, Any
 import numpy as np
+from causality.variable import Variable
 from causality.discrete_set import DiscreteSet
 
 class IndependentDistribution:
-    def __init__(self, dists: dict, seed=None):
+    def __init__(self, dists: Mapping[Variable, Any], seed=None):
         """Constructor.
         
         :param dists: A dict where the keys are `Variable`  instances,
@@ -12,7 +14,7 @@ class IndependentDistribution:
         self.dists = dists
         self.generator = np.random.default_rng(seed)
      
-    def rvs(self, size: int) -> dict:
+    def rvs(self, size: int) -> dict[Variable, np.ndarray]:
         """Generates a number of random samples of the distribution.
         
         :param size: The number of samples to generate

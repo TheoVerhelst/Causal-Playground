@@ -1,9 +1,11 @@
 from math import sin, cos, atan2, sqrt
+from numbers import Number
 from random import uniform
 from itertools import permutations
+from causality.causal_graph import CausalGraph
+from matplotlib.axes import Axes
 
-
-def plot_graph(graph, axis, font_size=13, font_family="serif"):
+def plot_graph(graph: CausalGraph, axis: Axes, font_size: int=13, font_family: str="serif"):
     plot_margin_x = 1
     plot_margin_y = 1
     gap_begin = 0.25
@@ -47,7 +49,7 @@ def plot_graph(graph, axis, font_size=13, font_family="serif"):
             linewidth=0
         )
 
-def force_based_position(graph, min_x=0, max_x=2, min_y=0, max_y=2):
+def force_based_position(graph: CausalGraph, min_x: Number=0, max_x: Number=2, min_y: Number=0, max_y: Number=2):
     repulsion = 0.1
     attraction = 1
     spring_length = 2

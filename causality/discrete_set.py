@@ -1,9 +1,11 @@
 from operator import mul
+from typing import Sequence
 from functools import reduce
 import numpy as np
+from causality.variable import Variable
 
 class DiscreteSet:
-    def __init__(self, dimensions, values: np.ndarray):
+    def __init__(self, dimensions: Sequence[Variable], values: np.ndarray):
         """Contructor.
         
         :param dimensions: iterable of N variables denoting the dimensions
@@ -13,12 +15,12 @@ class DiscreteSet:
         self.dimensions = tuple(dimensions)
         self.values = values
     
-    def tensor(self, other, axis):
+    def tensor(self, other, axis: Variable):
         """Tensor product of both sets, where the sum is over `axis`.
         Dimensions common to `self` and `other` are collapsed into one.
         """
         
-        common_dimensions = self.match_to_tensor(other, axis)
+        common_dimensions = self._match_to_tensor(other, axis)
         common_size = reduce(mul, (len(dim.support) for dim in common_dimensions), 1)
         self_values = self.values.reshape((len(axis.support), common_size, -1))
         other_values = other.values.reshape((len(axis.support), common_size, -1))
@@ -56,7 +58,7 @@ class DiscreteSet:
         res.values = np.logical_not(res.values)
         return res
     
-    def match_to_tensor(self, other, axis):
+    def _match_to_tensor(self, other, axis: Variable):
         """
         Example input:
         ```
@@ -70,19 +72,19 @@ class DiscreteSet:
             other.dimensions = (c, b, e, f)
         ```
         """
-        self.swap_axes(0, self.dimensions.index(axis))
-        other.swap_axes(0, other.dimensions.index(axis))
+        self._swap_axes(0, self.dimensions.index(axis))
+        other._swap_axes(0, other.dimensions.index(axis))
         common_dimensions = []
         for i_self, dim in enumerate(self.dimensions[1:], start=1):
             if dim in other.dimensions:
                 i_other = other.dimensions.index(dim)
-                self.swap_axes(len(common_dimensions) + 1, i_self)
-                other.swap_axes(len(common_dimensions) + 1, i_other)
+                self._swap_axes(len(common_dimensions) + 1, i_self)
+                other._swap_axes(len(common_dimensions) + 1, i_other)
                 common_dimensions.append(dim)
         return common_dimensions
                 
     
-    def swap_axes(self, i, j):
+    def _swap_axes(self, i: int, j: int):
         self.values = np.swapaxes(self.values, i, j)
         new_dims = list(self.dimensions)
         new_dims[i], new_dims[j] = new_dims[j], new_dims[i]

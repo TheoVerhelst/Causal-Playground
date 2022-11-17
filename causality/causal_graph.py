@@ -2,29 +2,29 @@ from graph import Graph
 
 class CausalGraph(Graph):
     def __init__(self, *args, **kwargs):
-        super(CausalGraph, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._undirected = None
         self._complete = None
     
     def add_edge(self, *args, **kwargs):
         self._undirected = None
         self._complete = None
-        super(CausalGraph, self).add_edge(*args, **kwargs)
+        super().add_edge(*args, **kwargs)
     
     def del_edge(self, *args, **kwargs):
         self._undirected = None
         self._complete = None
-        super(CausalGraph, self).del_edge(*args, **kwargs)
+        super().del_edge(*args, **kwargs)
     
     def add_node(self, *args, **kwargs):
         self._undirected = None
         self._complete = None
-        super(CausalGraph, self).add_node(*args, **kwargs)
+        super().add_node(*args, **kwargs)
     
     def del_node(self, *args, **kwargs):
         self._undirected = None
         self._complete = None
-        super(CausalGraph, self).del_node(*args, **kwargs)
+        super().del_node(*args, **kwargs)
         
     def copy(self):
         return CausalGraph(from_dict=self.to_dict())
@@ -77,10 +77,6 @@ class CausalGraph(Graph):
     def is_adjacent(self, x, y):
         """True if x -> y or x <- y."""
         return self.edge(x, y) is not None or self.edge(y, x) is not None
-
-    def is_neighbor(self, x, y):
-        """Same as is_adjacent."""
-        return self.is_adjacent(x, y)
 
     def is_undirected(self, x, y):
         """True if x -> y and x <- y."""

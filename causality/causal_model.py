@@ -78,15 +78,24 @@ class CausalModel:
         # that satisfy the expression, we only need to measure their probability
         return model.exo_dist.pmf(values)
     
-    def intervention(self, var, value):
+    def intervention(self, var: Variable, value):
+        """Add the intervention `do(var = value)` to the model. This
+        consists in removing the edges from the parents of `var` to
+        `var`, and replacing its function by a constant function
+        `f() = value`. The model is modified in place.
+        """
         self.twin_networks.add(var.intervention)
-        res = copy(self)
         self.functions[var] = ConstantFunction(var, value)
         for pa in self.graph.parents({var}):
             self.graph.del_edge(pa, var)
     
-    def add_twin_network(self, var, value):
-        assert var in self.graph.nodes()
+    def add_twin_network(self, var: Variable, value):
+        """Add a twin network under the intervention `do(var = value)`.
+        This consists in duplicating all descendants of `var`, and
+        connecting the added nodes as in the original graph. The
+        function of the duplicated instance of `var` is replaced by
+        a constant function, like if we did `self.intervention(var, value)`.
+        """
         V_x = {v: v.do(var, value) for v in self.graph.descendants({var})}
         for v, v_x in V_x.items():
             if v == var:

@@ -1,13 +1,20 @@
 from functools import reduce
-from typing import Protocol
+from typing import Protocol, Sequence, Union
 from causality.variable import Variable
 from causality.discrete_set import DiscreteSet
 
 class Expression(Protocol):
+    """Defines the expected methods (i.e.the protocol) of Expression
+    objects.
+    """
     def __str__(self) -> str:
         ...
     
     def values(self) -> DiscreteSet:
+        """Returns a `DiscreteSet` indicating which valuations of the
+        variables satisfy the expression. The set will contain one axis
+        for each `Variable` involved in the expression.
+        """
         ...
 
 class EqualityExpr:
@@ -128,14 +135,35 @@ class ProductExpr:
         return str(self)
 
 
-def make_realisation(variables):
-    return set(V.name.lower() if isinstance(V, Variable) else V.lower() for V in variables)
+def make_realisation(variables: Sequence[Union[Variable, str]]) -> set[str]:
+    """Returns the set of variable names as string, in lowercase. This
+    is used when summing over the values of variables, to define the
+    summation indices.
+    :param variables: A sequence of `Variable` or strings.
+    """
+    return set(V.name.lower() \
+            if isinstance(V, Variable) \
+            else V.lower() 
+            for V in variables)
 
 
-def make_prime(variables):
-    return set(Variable(V.name + "'", V.support, V.intervention) if isinstance(V, Variable) else V + "'" for V in variables)
+def make_prime(variables: Sequence[Union[Variable, str]]) -> set[Union[Variable, str]]:
+    """Returns the set of variables where a prime is added to the name
+    of the variables.
+    :param variables: A sequence of `Variable` or strings.
+    """
+    return set(Variable(V.name + "'", V.support, V.intervention) \
+            if isinstance(V, Variable) \
+            else V + "'" \
+            for V in variables)
 
 
-def make_realisation_prime(variables):
-    return set(V.name.lower() + "'" if isinstance(V, Variable) else V.lower() + "'" for V in variables)
+def make_realisation_prime(variables: Sequence[Union[Variable, str]]) -> set[str]:
+    """Returns the set of variable names in lowercase, with a prime.
+    :param variables: A sequence of `Variable` or strings.
+    """
+    return set(V.name.lower() + "'" \
+            if isinstance(V, Variable) \
+            else V.lower() + "'" \
+            for V in variables)
 

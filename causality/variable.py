@@ -1,5 +1,4 @@
 import numpy as np
-from causality.discrete_set import DiscreteSet
 
 class Variable:
     def __init__(self, name: str, support: list, intervention = None):
@@ -8,6 +7,8 @@ class Variable:
         self.intervention = intervention
     
     def values(self):
+        # Avoid circular dependency between variable and discrete_set
+        from causality.discrete_set import DiscreteSet
         return DiscreteSet((self,), np.full(len(self.support), False))
      
     def do(self, variable, value):

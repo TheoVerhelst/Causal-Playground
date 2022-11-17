@@ -29,7 +29,7 @@ def generate_linear_system(n_nodes, n_edges, min_mu, max_mu, min_sigma, max_sigm
 
     return graph
 
-def sample_linear_system(graph, n_samples):
+def sample_linear_system(graph: CausalGraph, n_samples: int):
     """Returns a matrix of shape (n_sample, len(graph.nodes())) containing
     values sampled according to the graph. The columns are ordered according
     to the node order given by graph.nodes().

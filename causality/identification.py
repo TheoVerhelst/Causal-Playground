@@ -2,12 +2,12 @@ from itertools import combinations
 from causality.causal_graph import CausalGraph
 from causality.expression import ProbabilityExpr, SummationExpr, ProductExpr, make_prime, ConjunctionExpr
 
-def no_back_door_path(graph, X, Y, Z):
+def no_back_door_path(graph: CausalGraph, X, Y, Z):
     """True if there is no back-door path (confounding) from X to Y given Z."""
     return graph.remove_out_of(X).is_d_separated(X, Y, Z)
 
 # "Causality" by Pearl (2009), def 3.3.1, p. 79.
-def back_door_criterion(graph, X, Y, Z):
+def back_door_criterion(graph: CausalGraph, X, Y, Z):
     return no_back_door_path(graph, X, Y, Z) and graph.descendants(X).isdisjoint(Z)
 
 # Van der Zander, Benito, and Maciej Liśkiewicz. "Finding minimal d-separators
@@ -15,7 +15,7 @@ def back_door_criterion(graph, X, Y, Z):
 # PMLR, 2020.
 # There is probably a better implementation based on the Dijsktra algorithm,
 # but I'm too lazy to write it
-def closure(graph, X, A, Z):
+def closure(graph: CausalGraph, X, A, Z):
     """
     Returns all nodes V for which there is a path from X to V that
         * contains only members of A, and
@@ -41,7 +41,7 @@ def closure(graph, X, A, Z):
 # van der Zander, Benito, and Maciej Liśkiewicz. "Finding minimal d-separators
 # in linear time and applications." Uncertainty in Artificial Intelligence.
 # PMLR, 2020.
-def blocking_set(graph, X, Y, U = set(), always_included = set()):
+def blocking_set(graph: CausalGraph, X, Y, U = set(), always_included = set()):
     R = set(graph.nodes()).difference(U)
     A = graph.ancestors(X.union(Y).union(always_included))
     Z_0 = R.intersection(A.difference(X.union(Y)))
@@ -57,7 +57,7 @@ def blocking_set(graph, X, Y, U = set(), always_included = set()):
 # This is exp time, see "Adjustment Criteria in Causal Diagrams: An Algorithmic
 # Perspective" by Johannes Textor and Maciej Liskiewicz for a better
 # algorithm (polynomial per output element).
-def all_minimal_adjustment_sets(graph, X, Y, U = set()):
+def all_minimal_adjustment_sets(graph: CausalGraph, X, Y, U = set()):
     candidates = set(graph.nodes()).difference(X).difference(Y).difference(U)
     res = set()
     for k in range(len(candidates)):

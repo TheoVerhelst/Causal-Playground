@@ -21,10 +21,10 @@ X[:, 1] = U[:, 1] + beta_1 * X[:, 0]
 X[:, 2] = U[:, 2] + beta_2 * X[:, 0]
 test = GaussianIndependenceTest(X, ["X", "Y", "Z"])
 
-print("Expected: p=0, estimated: p={:.3f}".format(test.gaussian_indep_test("Y", "Z", [])))
-print("Expected: p=0, estimated: p={:.3f}".format(test.gaussian_indep_test("X", "Y", [])))
-print("Expected: p=0, estimated: p={:.3f}".format(test.gaussian_indep_test("X", "Z", [])))
-print("Expected: p>0, estimated: p={:.3f}".format(test.gaussian_indep_test("Y", "Z", ["X"])))
-print("Expected: p=0, estimated: p={:.3f}".format(test.gaussian_indep_test("X", "Y", ["Z"])))
-print("Expected: p=0, estimated: p={:.3f}".format(test.gaussian_indep_test("X", "Z", ["Y"])))
+print("Expected: p=0, estimated: p={:.3f}".format(test.indep_test("Y", "Z", [])))
+print("Expected: p=0, estimated: p={:.3f}".format(test.indep_test("X", "Y", [])))
+print("Expected: p=0, estimated: p={:.3f}".format(test.indep_test("X", "Z", [])))
+print("Expected: p>0, estimated: p={:.3f}".format(test.indep_test("Y", "Z", ["X"])))
+print("Expected: p=0, estimated: p={:.3f}".format(test.indep_test("X", "Y", ["Z"])))
+print("Expected: p=0, estimated: p={:.3f}".format(test.indep_test("X", "Z", ["Y"])))
 

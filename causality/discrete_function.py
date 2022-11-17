@@ -1,9 +1,11 @@
 from functools import reduce
+from typing import Sequence
 import numpy as np
+from causality.variable import Variable
 from causality.discrete_set import DiscreteSet
 
 class DiscreteFunction:
-    def __init__(self, function, inputs, output):
+    def __init__(self, function, inputs: Sequence[Variable], output: Variable):
         """Constructor.
         
         :param function: function that takes as many arguments as the
@@ -35,7 +37,13 @@ class DiscreteFunction:
 
 
 class Xor(DiscreteFunction):
-    def __init__(self, inputs, output):
+    def __init__(self, inputs: Sequence[Variable], output: Variable):
+        """Constructor.
+        
+        :param inputs: A sequence of `Variable` denoting the inputs.
+        Their support must be valid inputs for `numpy.logical_xor`.
+        :param output: The output `Variable`
+        """
         super(Xor, self).__init__(
             lambda *values: reduce(lambda a, b: np.logical_xor(a, b), values),
             inputs,
@@ -43,7 +51,13 @@ class Xor(DiscreteFunction):
         )
 
 class ConstantFunction(DiscreteFunction):
-    def __init__(self, output, value):
+    def __init__(self, output: Variable, value):
+        """Constructor. This function has no inputs.
+        
+        :param output: The output variable. Its support must contain
+        `value`.
+        :param value: The value output by the function
+        """
         super(ConstantFunction, self).__init__(
             lambda: value,
             (),

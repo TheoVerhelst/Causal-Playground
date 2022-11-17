@@ -1,9 +1,10 @@
+from typing import Sequence
 from math import sqrt, log1p
 import numpy as np
 from scipy.stats import norm
 
 class GaussianIndependenceTest:
-    def __init__(self, data_matrix, column_names):
+    def __init__(self, data_matrix: np.ndarray, column_names: Sequence[str]):
         self.data_matrix = data_matrix
         self.inv_names = {name: i for i, name in enumerate(column_names)}
         self.n = data_matrix.shape[0]
@@ -14,7 +15,7 @@ class GaussianIndependenceTest:
         """Returns log((1 + x) / (1 - x)) in a numerically stable way."""
         return log1p(2 * x / (1 - x))
 
-    def partial_corr(self, i, j, K):
+    def partial_corr(self, i: str, j: str, K: Sequence[str]):
         K = list(K)
         if len(K) == 0:
             return self.corr_matrix[self.inv_names[i], self.inv_names[j]]
@@ -35,10 +36,10 @@ class GaussianIndependenceTest:
             return res
 
 
-    def z_stat(self, i, j, K):
+    def z_stat(self, i: str, j: str, K: Sequence[str]):
         r = self.partial_corr(i, j, K)
         return sqrt(self.n - len(K) - 3) * abs(0.5 * self.log_q1pm(r))
 
-    def indep_test(self, i, j, K):
+    def indep_test(self, i: str, j: str, K: Sequence[str]):
         z = self.z_stat(i, j, K)
         return 2 * (1 - norm.cdf(z))
