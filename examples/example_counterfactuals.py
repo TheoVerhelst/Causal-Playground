@@ -1,8 +1,5 @@
 from scipy import stats
-from causality.variable import Variable
-from causality.discrete_function import Xor
-from causality.distribution import IndependentDistribution
-from causality.causal_model import CausalModel
+from causality import Variable, Xor, IndependentDistribution, CausalModel
 from causality.expression import ConjunctionExpr, EqualityExpr
 
 X = Variable("X", (False, True))

@@ -30,7 +30,7 @@ class GaussianIndependenceTest:
             res = (self.partial_corr(i, j, K) - corr_i_h * corr_j_h) \
                 / sqrt((1 - corr_i_h**2) * (1 - corr_j_h**2))
             # Cache the result
-            print("p-corr {} - {} | {} = {}".format(i, j, K + [h], res))
+            #print("p-corr {} - {} | {} = {}".format(i, j, K + [h], res))
             self.partial_corr_dict[idx] = res
             return res
 
@@ -39,6 +39,6 @@ class GaussianIndependenceTest:
         r = self.partial_corr(i, j, K)
         return sqrt(self.n - len(K) - 3) * abs(0.5 * self.log_q1pm(r))
 
-    def gaussian_indep_test(self, data_matrix, i, j, K):
+    def gaussian_indep_test(self, i, j, K):
         z = self.z_stat(i, j, K)
         return 2 * (1 - norm.cdf(z))

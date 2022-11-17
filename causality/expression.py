@@ -1,5 +1,6 @@
 from functools import reduce
 from typing import Protocol
+from causality.variable import Variable
 from causality.discrete_set import DiscreteSet
 
 class Expression(Protocol):
@@ -29,7 +30,7 @@ class InterventionExpr:
         self.expression = expression
     
     def __str__(self):
-        return "\\mathrm{do}(" + str(self.expression) + ")"
+        return "do(" + str(self.expression) + ")"
 
 
 class ConjunctionExpr:
@@ -89,13 +90,13 @@ class ProbabilityExpr:
         res = "P(" + str(self.expression)
         
         if self.condition is not None or self.intervention is not None:
-            res += " \\mid "
+            res += " | "
         
         if self.condition is not None:
             res += str(self.condition)
         
         if self.intervention is not None:
-            res += str(self.intervention)
+            res += "do(" + str(self.intervention) + ")"
         
         res += ")"
         return res
@@ -110,7 +111,7 @@ class SummationExpr:
         self.expression = expression
 
     def __str__(self):
-        return "\\sum_{" + std(self.indices) + "} " + str(self.expression)
+        return "\\sum_{" + str(self.indices) + "} " + str(self.expression)
 
     def __repr__(self):
         return str(self)
@@ -128,13 +129,13 @@ class ProductExpr:
 
 
 def make_realisation(variables):
-    return [V.lower() for V in variables]
+    return set(V.name.lower() if isinstance(V, Variable) else V.lower() for V in variables)
 
 
 def make_prime(variables):
-    return [V + "'" for V in variables]
+    return set(Variable(V.name + "'", V.support, V.intervention) if isinstance(V, Variable) else V + "'" for V in variables)
 
 
 def make_realisation_prime(variables):
-    return [V.lower() + "'" for V in variables]
+    return set(V.name.lower() + "'" if isinstance(V, Variable) else V.lower() + "'" for V in variables)
 

@@ -1,5 +1,5 @@
 from functools import reduce
-from copy import copy
+from copy import copy, deepcopy
 from typing import Mapping
 import numpy as np
 from causality.causal_graph import CausalGraph
@@ -53,14 +53,15 @@ class CausalModel:
         
         # If we have counterfactual variables, add the twin networks
         # to this model
+        model = deepcopy(self)
         for var in values.dimensions:
-            if var.intervention is not None and var.intervention not in self.twin_networks:
-                self.add_twin_network(*var.intervention)
+            if var.intervention is not None and var.intervention not in model.twin_networks:
+                model.add_twin_network(*var.intervention)
                 
         # While there are endogenous variables in values
         while True:
             # Sort them in reversed topological order
-            endogenous = [v for v in self.sorted_endogenous[::-1] \
+            endogenous = [v for v in model.sorted_endogenous[::-1] \
                     if v in values.dimensions]
             
             if len(endogenous) == 0:
@@ -71,11 +72,11 @@ class CausalModel:
                 # definition of var and the current set of values is
                 # found with the tensor product where the sum is over
                 # var. Trust me.
-                values = values.tensor(self.functions[var].preimage, var)
+                values = values.tensor(model.functions[var].preimage, var)
                 
         # Now we have the set of values of exogenous variables
         # that satisfy the expression, we only need to measure their probability
-        return self.exo_dist.pmf(values)
+        return model.exo_dist.pmf(values)
     
     def intervention(self, var, value):
         self.twin_networks.add(var.intervention)

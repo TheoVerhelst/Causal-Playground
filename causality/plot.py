@@ -3,10 +3,9 @@ from random import uniform
 from itertools import permutations
 
 
-def plot_graph(graph, axis, font_size = 13, font_family = "serif"):
+def plot_graph(graph, axis, font_size=13, font_family="serif"):
     plot_margin_x = 1
     plot_margin_y = 1
-
     gap_begin = 0.25
     gap_end = 0.25
     text_shift_x = -0.1

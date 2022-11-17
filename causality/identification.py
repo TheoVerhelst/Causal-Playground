@@ -1,5 +1,6 @@
 from itertools import combinations
-from causality.expression import ProbabilityExpr, SummationExpr, ProductExpr, make_prime
+from causality.causal_graph import CausalGraph
+from causality.expression import ProbabilityExpr, SummationExpr, ProductExpr, make_prime, ConjunctionExpr
 
 def no_back_door_path(graph, X, Y, Z):
     """True if there is no back-door path (confounding) from X to Y given Z."""
@@ -69,7 +70,7 @@ def all_minimal_adjustment_sets(graph, X, Y, U = set()):
     return res
 
 # "Causality" by Pearl (2009), sec. 4.3.3, p.117.
-def closed_form(graph, X, Y, U = set()):
+def closed_form(graph: CausalGraph, X: set, Y: set, U: set = set()):
     """Find closed-form expressions for the causal effect P(Y | do(X)),
     considering U as latent (can't be adjusted for or conditioned on).
 
@@ -77,15 +78,17 @@ def closed_form(graph, X, Y, U = set()):
     number of them (for example, there can be many valid adjustment sets).
     """
     res = []
+    X_expr = ConjunctionExpr(X)
+    Y_expr = ConjunctionExpr(Y)
 
     # If there is no causal path from X to Y
     if graph.remove_into(X).is_d_separated(X, Y, set()):
-        res.append(ProbabilityExpr(Y))
+        res.append(ProbabilityExpr(Y_expr))
         return res
 
     # If there is no confounding from X to Y
     if no_back_door_path(graph, X, Y, set()):
-        res.append(ProbabilityExpr(Y, cond=X))
+        res.append(ProbabilityExpr(Y_expr, condition=X_expr))
         return res
 
     # Back-door adjustment
@@ -93,29 +96,34 @@ def closed_form(graph, X, Y, U = set()):
         if len(B) > 0:
             closed_forms_B = closed_form(graph, X, B)
             for closed_form_B in closed_forms_B:
+                B_expr = ConjunctionExpr(B)
+                B_X_expr = ConjunctionExpr(B.union(X))
                 res.append(
                     SummationExpr(
-                        B,
-                        ProductExpr([ProbabilityExpr(Y, cond=B.union(X)), closed_form_B])
+                        B_expr,
+                        ProductExpr([ProbabilityExpr(Y_expr, condition=B_X_expr), closed_form_B])
                     )
                 )
 
     # Front door adjustment
     Z_1 = graph.children(X).intersection(graph.ancestors(Y))
     if len(Z_1) > 0 and Y.isdisjoint(Z_1):
+        Z_1_expr = ConjunctionExpr(Z_1)
+        X_prime_expr = ConjunctionExpr(make_prime(X))
+        X_prime_Z_1_expr = ConjunctionExpr(make_prime(X).union(Z_1))
         # If Z_1 is unconfounded
         if no_back_door_path(graph.remove_into(X), Z_1, Y, set()) \
                 and no_back_door_path(graph, X, Z_1, set()):
             # Front-door adjustment with unconfounded mediator Z_1
             res.append(Summation(
-                Z_1,
+                Z_1_expr,
                 ProductExpr([
-                    ProbabilityExpr(Z_1, cond=X),
+                    ProbabilityExpr(Z_1_expr, condition=X_expr),
                     SummationExpr(
-                        make_prime(X),
+                        X_prime_expr,
                         ProductExpr([
-                            ProbabilityExpr(Y, cond=make_prime(X).union(Z_1)),
-                            ProbabilityExpr(make_prime(X))
+                            ProbabilityExpr(Y_expr, condition=X_prime_Z_1_expr),
+                            ProbabilityExpr(X_prime_expr)
                         ])
                     )
                 ])
@@ -128,18 +136,22 @@ def closed_form(graph, X, Y, U = set()):
                 for Z_4 in all_minimal_adjustment_sets(graph.remove_into(X), Z_1, Y, U=U):
                     Z_2 = Z_3.union(Z_4)
                     if X.isdisjoint(Z_2) and Z_2 not in Z_2_already_used:
+                        Z_2_expr = ConjunctionExpr(Z_2)
+                        Z_1_Z_2_expr = ConjunctionExpr(Z_1.union(Z_2))
+                        X_Z_2_expr = ConjunctionExpr(X.union(Z_2))
+                        X_1_prime_Z_1_Z_2_expr = ConjunctionExpr(make_prime(X).union(Z_1).union(Z_2))
                         Z_2_already_used.add(Z_2)
                         res.append(
                             SummationExpr(
-                                Z_1.union(Z_2),
+                                Z_1_Z_2_expr,
                                 ProductExpr([
-                                    ProbabilityExpr(Z_2),
-                                    ProbabilityExpr(Z_1, cond=X.union(Z_2)),
+                                    ProbabilityExpr(Z_2_expr),
+                                    ProbabilityExpr(Z_1_expr, condition=X_Z_2_expr),
                                     SummationExpr(
-                                        make_prime(X),
+                                        X_prime_expr,
                                         ProductExpr([
-                                            ProbabilityExpr(Y, cond=make_prime(X).union(Z_1).union(Z_2)),
-                                            ProbabilityExpr(make_prime(X), cond=Z_2)
+                                            ProbabilityExpr(Y_expr, condition=X_1_prime_Z_1_Z_2_expr),
+                                            ProbabilityExpr(X_prime_expr, condition=Z_2_expr)
                                         ])
                                     )
                                 ])

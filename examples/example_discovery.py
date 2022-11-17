@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
-from random_system import generate_linear_system, sample_linear_system
-from gaussian import GaussianIndependenceTest
-from discovery import pc_algorithm
-from plot import force_based_position, plot_graph
+from causality.random_system import generate_linear_system, sample_linear_system
+from causality.gaussian import GaussianIndependenceTest
+from causality.discovery import pc_algorithm
+from causality.plot import force_based_position, plot_graph
 
 graph = generate_linear_system(
     n_nodes=3,
