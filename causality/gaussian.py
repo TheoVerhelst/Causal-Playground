@@ -39,6 +39,6 @@ class GaussianIndependenceTest:
         r = self.partial_corr(i, j, K)
         return sqrt(self.n - len(K) - 3) * abs(0.5 * self.log_q1pm(r))
 
-    def gaussian_indep_test(self, i, j, K):
+    def indep_test(self, i, j, K):
         z = self.z_stat(i, j, K)
         return 2 * (1 - norm.cdf(z))

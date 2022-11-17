@@ -5,7 +5,7 @@ from causality.discovery import pc_algorithm
 from causality.plot import force_based_position, plot_graph
 
 graph = generate_linear_system(
-    n_nodes=3,
+    n_nodes=5,
     n_edges=3,
     min_mu=0,
     max_mu=0,
@@ -17,15 +17,10 @@ graph = generate_linear_system(
 N = 100000
 X = sample_linear_system(graph, N)
 ind_test = GaussianIndependenceTest(X, graph.nodes())
-res = pc_algorithm(X, ind_test.gaussian_indep_test, alpha=0.05, initial_graph=graph.complete())
-print(ind_test.corr_matrix)
+res = pc_algorithm(X, ind_test, alpha=0.05, initial_graph=graph.complete())
 force_based_position(res)
 
-for n in graph.nodes():
-    print("{} = {:.1f} += {:.1f}".format(n, graph.node(n)["mu"], graph.node(n)["sigma"]))
-for e in graph.edges():
-    print("{} -{:.1f}-> {}".format(e[0], e[2], e[1]))
-
-plot_graph(res)
+fig, ax = plt.subplots()
+plot_graph(res, ax)
 plt.show()
 

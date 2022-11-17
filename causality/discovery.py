@@ -1,9 +1,12 @@
 from itertools import combinations
 from causality.causal_graph import CausalGraph
 
-def pc_algorithm(data, cond_ind_test, alpha, initial_graph=None, **kwargs):
+def pc_algorithm(data, indep_test, alpha, initial_graph=None, **kwargs):
     if initial_graph is None:
-        graph = CausalGraph(from_dict={n:{} for n in range(data.shape[1])}).complete()
+        graph = CausalGraph()
+        for i in range(data.shape[1]):
+            grap.add_node("V" + str(i))
+        graph = graph.complete()
     else:
         graph = initial_graph
 
@@ -19,9 +22,8 @@ def pc_algorithm(data, cond_ind_test, alpha, initial_graph=None, **kwargs):
                 adj_x_y = adj_x.difference({y})
                 # combinations will return an empty list if cond_set_size > len(adj_x_y)
                 for Z in combinations(adj_x_y, cond_set_size):
-                    p = cond_ind_test(data, x, y, Z, **kwargs)
+                    p = indep_test.indep_test(x, y, Z, **kwargs)
                     if p > alpha:
-                        print("Remove edge {}-{}, cond={}, p={}".format(x, y, Z, p))
                         graph.del_edge(x, y)
                         graph.del_edge(y, x)
                         sep_set[(x, y)] = Z

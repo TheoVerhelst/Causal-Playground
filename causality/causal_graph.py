@@ -45,7 +45,7 @@ class CausalGraph(Graph):
     def complete(self):
         """Returns a copy with every possible edges between nodes."""
         if self._complete is None:
-            self.complete = CausalGraph()
+            self._complete = CausalGraph()
             
             for node in self.nodes():
                 self._complete.add_node(node, obj=self.node(node))

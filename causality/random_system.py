@@ -8,7 +8,7 @@ def generate_linear_system(n_nodes, n_edges, min_mu, max_mu, min_sigma, max_sigm
     if n_edges > (n_nodes - 1) * n_nodes / 2:
         raise ValueError("Can't create a DAG with {} nodes and {} edges".format(len(nodes), n_edges))
 
-    nodes = list(range(n_nodes))
+    nodes = ["V" + str(i) for i in range(n_nodes)]
 
     shuffle(nodes)
     # Create a list of all possible edges
