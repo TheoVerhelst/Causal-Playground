@@ -3,7 +3,7 @@ Implementation of fundamental causality algorithms and models
 
 ## Run the examples
 ```
-python -m examples.example_counterfactuals.py
+python -m examples.example_counterfactuals
 ```
 
 ## Run the tests

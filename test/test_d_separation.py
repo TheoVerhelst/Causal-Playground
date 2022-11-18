@@ -1,5 +1,5 @@
 import unittest
-from causality.causal_graph import CausalGraph
+from causality import CausalGraph
 
 class TestGraphHelpers(unittest.TestCase):
     def setUp(self):

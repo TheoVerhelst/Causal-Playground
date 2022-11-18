@@ -4,6 +4,7 @@ from functools import reduce
 import numpy as np
 from causality.variable import Variable
 
+
 class DiscreteSet:
     def __init__(self, dimensions: Sequence[Variable], values: np.ndarray):
         """Contructor.
@@ -119,7 +120,7 @@ class DiscreteSet:
                 i_self = self.dimensions.index(dim)
                 assert i_self >= i_other
                 # Swap axes in self
-                self.swap_axes(i_self, N - i_other)
+                self._swap_axes(i_self, N - i_other)
             except ValueError:
                 # Add an axis in self
                 self.dimensions = self.dimensions[:N - i_other] + (dim,) + self.dimensions[N - i_other:]

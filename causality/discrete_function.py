@@ -44,11 +44,50 @@ class Xor(DiscreteFunction):
         Their support must be valid inputs for `numpy.logical_xor`.
         :param output: The output `Variable`
         """
-        super(Xor, self).__init__(
+        super().__init__(
             lambda *values: reduce(lambda a, b: np.logical_xor(a, b), values),
             inputs,
             output
         )
+        
+        
+class And(DiscreteFunction):
+    def __init__(self, inputs: Sequence[Variable], output: Variable):
+        """Constructor.
+        
+        :param inputs: A sequence of `Variable` denoting the inputs.
+        Their support must be valid inputs for `numpy.logical_a,d`.
+        :param output: The output `Variable`
+        """
+        super().__init__(
+            lambda *values: reduce(lambda a, b: np.logical_and(a, b), values),
+            inputs,
+            output
+        )
+        
+        
+class Or(DiscreteFunction):
+    def __init__(self, inputs: Sequence[Variable], output: Variable):
+        """Constructor.
+        
+        :param inputs: A sequence of `Variable` denoting the inputs.
+        Their support must be valid inputs for `numpy.logical_or`.
+        :param output: The output `Variable`
+        """
+        super().__init__(
+            lambda *values: reduce(lambda a, b: np.logical_or(a, b), values),
+            inputs,
+            output
+        )
+        
+class Not(DiscreteFunction):
+    def __init__(self, input_: Variable, output: Variable):
+        super().__init__(
+            lambda value: np.logical_not(value),
+            [input_],
+            output
+        )
+        
 
 class ConstantFunction(DiscreteFunction):
     def __init__(self, output: Variable, value):
@@ -58,7 +97,7 @@ class ConstantFunction(DiscreteFunction):
         `value`.
         :param value: The value output by the function
         """
-        super(ConstantFunction, self).__init__(
+        super().__init__(
             lambda: value,
             (),
             output
