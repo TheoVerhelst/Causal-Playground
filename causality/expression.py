@@ -1,5 +1,6 @@
 from functools import reduce
 from typing import Protocol, Sequence, Union
+import numpy as np
 from causality.variable import Variable
 from causality.discrete_set import DiscreteSet
 
@@ -18,27 +19,40 @@ class Expression(Protocol):
         ...
 
 class EqualityExpr:
-    def __init__(self, variable, value):
-        self.variable = variable
-        self.value = value
+    def __init__(self, lhs, rhs):
+        self.lhs = lhs
+        self.rhs = rhs
     
     def __str__(self):
-        return str(self.variable) + " = " + str(self.value)
+        return str(self.lhs) + " = " + str(self.rhs)
     
     def values(self):
-        values = self.variable.values()
-        if self.value in self.variable.support:
-            values.values[self.variable.support.index(self.value)] = True
-        return values
-
-
-class InterventionExpr:
-    def __init__(self, expression):
-        self.expression = expression
-    
-    def __str__(self):
-        return "do(" + str(self.expression) + ")"
-
+        # If we have variable = literal or literal = variable
+        if isinstance(self.lhs, Variable) != isinstance(self.rhs, Variable):
+            if isinstance(self.lhs, Variable):
+                variable = self.lhs
+                value = self.rhs
+            else:
+                variable = self.rhs
+                value = self.lhs
+            values_array = np.full(len(variable.support), False)
+            if value in variable.support:
+                values_array[variable.support.index(value)] = True
+            return DiscreteSet((variable,), values_array)
+            
+        elif isinstance(self.lhs, Variable):
+            # We have variable1 = variable2
+            values_array = np.full((len(self.lhs.support), len(self.rhs.support)), False)
+            for i, val_lhs in enumerate(self.lhs.support):
+                for j, val_rhs in enumerate(self.rhs.support):
+                    if val_lhs == val_rhs:
+                        values_array[i, j] = True
+            return DiscreteSet((self.lhs, self.rhs), values_array)
+            
+        else:
+            # We have value1 = value2. Return a zero-dimensional set
+            return DiscreteSet((), self.lhs == self.rhs)
+            
 
 class ConjunctionExpr:
     def __init__(self, expressions):
@@ -48,7 +62,7 @@ class ConjunctionExpr:
         return ", ".join(str(e) for e in self.expressions)
     
     def values(self):
-        return reduce(lambda a, b: a.values() & b.values(), self.expressions)
+        return reduce(lambda a, b: a & b, [e.values() for e in self.expressions])
         
         
 class DisjunctionExpr:
@@ -59,7 +73,7 @@ class DisjunctionExpr:
         return " \\lor ".join(str(e) for e in self.expressions)
     
     def values(self):
-        return reduce(lambda a, b: a.values() | b.values(), self.expressions)
+        return reduce(lambda a, b: a | b, [e.values() for e in self.expressions])
 
 
 class ExclusiveDisjunctionExpr:
@@ -70,7 +84,7 @@ class ExclusiveDisjunctionExpr:
         return " \\oplus ".join(str(e) for e in self.expressions)
     
     def values(self):
-        return reduce(lambda a, b: a.values() ^ b.values(), self.expressions)
+        return reduce(lambda a, b: a ^ b, [e.values() for e in self.expressions])
         
 
 class NegationExpr:

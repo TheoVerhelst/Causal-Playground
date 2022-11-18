@@ -15,8 +15,6 @@ F = {Z: Xor((X, Y), Z)}
 
 C = CausalModel(P, F)
 
-expression = ConjunctionExpr([
-    EqualityExpr(Z.do(X, True), False),
-    EqualityExpr(Z.do(X, False), True)]
-)
+expression = EqualityExpr(Z.do(X, False), Y)
+
 print("P(" + str(expression) + ") =", C.probability(expression))

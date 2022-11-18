@@ -16,6 +16,13 @@ class DiscreteSet:
         self.dimensions = tuple(dimensions)
         self.values = values
     
+    def __str__(self):
+        res = str(self.values) + "\n"
+        res + "Dimensions:\n"
+        for dim in self.dimensions:
+            res += str(dim) + " in " + str(dim.support) + "\n"
+        return res
+    
     def tensor(self, other, axis: Variable):
         """Tensor product of both sets, where the sum is over `axis`.
         Dimensions common to `self` and `other` are collapsed into one.

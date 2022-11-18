@@ -5,11 +5,6 @@ class Variable:
         self.name = name
         self.support = support
         self.intervention = intervention
-    
-    def values(self):
-        # Avoid circular dependency between variable and discrete_set
-        from causality.discrete_set import DiscreteSet
-        return DiscreteSet((self,), np.full(len(self.support), False))
      
     def do(self, variable, value):
         return Variable(self.name, self.support, (variable, value))
